@@ -1,4 +1,4 @@
-# 🚀 Static Server + JSON Server Setup
+# 🚀 Contact Saver
 
 ## A simple setup for front-end and back-end development using live server api for the frontend. Perfect for prototyping, testing, and learning purposes.
 

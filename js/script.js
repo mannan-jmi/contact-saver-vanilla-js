@@ -94,15 +94,16 @@ const hideInputSpinnerShowClearBtn = () => {
 /**
  * Function get data from api
  */
-const fetchContacts = async (page = 1, q, filter) => {
+const fetchContacts = async (page = 1, searchInputValue, filter) => {
   try {
-    showLoader();
     let url = `${API_END_POINT}/v1/api/micro/contact?page=${page}&limit=${RECORDS_PER_PAGE_LIMIT}`;
-    if (q) {
-      url = `${url}&search=${q}`;
-    }
     if (filter) {
       url = `${url}&type=${filter}`;
+    }
+    if (searchInputValue) {
+      url = `${url}&search=${searchInputValue}`;
+    } else {
+      showLoader();
     }
     const response = await axios.get(url);
     CONTACTS_DATA = response.data;
@@ -198,9 +199,10 @@ const renderData = async () => {
   try {
     let rowHtml = "";
     paginationHtml();
-    CONTACTS_DATA.data.forEach((item, index) => {
-      const serialNumber = (CONTACTS_DATA.page - 1) * RECORDS_PER_PAGE_LIMIT + index + 1;
-      rowHtml += `<tr>
+    if (CONTACTS_DATA.data.length) {
+      CONTACTS_DATA.data.forEach((item, index) => {
+        const serialNumber = (CONTACTS_DATA.page - 1) * RECORDS_PER_PAGE_LIMIT + index + 1;
+        rowHtml += `<tr>
         <td>${serialNumber}</td>
         <td>${capitalizeWords(item.name)}</td>
         <td>${item.phone}</td>
@@ -222,7 +224,12 @@ const renderData = async () => {
           </div>
         </td>
       </tr>`;
-    });
+      });
+    } else {
+      rowHtml += `<tr>
+        <td colspan="5">No records found!</td>
+      </tr>`;
+    }
 
     tbodyEl.innerHTML = rowHtml;
   } catch (error) {
