@@ -27,6 +27,7 @@ let dataIdForUpdateEl = document.getElementById("dataIdForUpdate");
 let searchEl = document.getElementById("search");
 let viewContactBodyEl = document.getElementById("view-contact-body");
 let inputRightIconEl = document.getElementById("input-right-icon");
+let filterSelectEL = document.getElementById("filterSelect");
 
 // Plugins or third party library instances
 // Create an instance of Notyf
@@ -138,7 +139,8 @@ const searchContact = async () => {
     showInputSpinner();
     debounceTimeout = setTimeout(async () => {
       let q = searchEl.value;
-      fetchContacts(1, q, null, false);
+      let filter = filterSelectEL.value;
+      fetchContacts(FIRST_PAGE, q, filter, false);
       hideSpinnerInMS();
     }, 300);
   } catch (error) {
@@ -161,7 +163,8 @@ const hideSpinnerInMS = () => {
  */
 const getDataByPagination = (page) => {
   let q = searchEl.value;
-  fetchContacts(page, q);
+  let filter = filterSelectEL.value;
+  fetchContacts(page, q, filter);
 };
 
 /**
@@ -176,7 +179,7 @@ const paginationHtml = () => {
     <li class="page-item ${CONTACTS_DATA.page == 1 ? "disabled" : ""}">
       <a
         class="page-link"
-        href="javascript:void();"
+        href="javascript:void(0);"
         onClick='getDataByPagination(${CONTACTS_DATA.page - 1})'
       >
         Previous
@@ -189,7 +192,7 @@ const paginationHtml = () => {
     paginationLi += `<li class="page-item">
         <a
           class="page-link ${CONTACTS_DATA.page == i ? "active" : ""}"
-          href="javascript:void();"
+          href="javascript:void(0);"
           onClick='getDataByPagination(${i})'
         >
           ${i}
@@ -201,15 +204,20 @@ const paginationHtml = () => {
     <li class="page-item ${CONTACTS_DATA.page == totalPages ? "disabled" : ""}">
       <a
         class="page-link"
-        href="javascript:void();"
+        href="javascript:void(0);"
         onClick='getDataByPagination(${CONTACTS_DATA.page + 1})'
       >
         Next
       </a>
     </li>
   `;
-  const finalHtml = prevBtn + paginationLi + nextBtn;
-  document.getElementById("pagination-ul").innerHTML = finalHtml;
+
+  if (CONTACTS_DATA.total) {
+    const finalHtml = prevBtn + paginationLi + nextBtn;
+    document.getElementById("pagination-ul").innerHTML = finalHtml;
+  } else {
+    document.getElementById("pagination-ul").innerHTML = "";
+  }
 };
 
 /**
@@ -469,3 +477,19 @@ const viewContact = (id) => {
     viewModal.show();
   }
 };
+
+/**
+ * Function to show and hide filter select option on click filter icon
+ */
+function toggleFilterDropdown() {
+  filterSelectEL.classList.toggle("d-none");
+}
+
+/**
+ * Function to filter contacts data
+ */
+function handleFilterChange(value) {
+  let q = searchEl.value;
+  fetchContacts(FIRST_PAGE, q, value, false);
+  filterSelectEL.classList.add("d-none");
+}
