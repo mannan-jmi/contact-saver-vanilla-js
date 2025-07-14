@@ -41,6 +41,7 @@ var viewModal = new bootstrap.Modal(viewContactModal);
 // constant to store contacts data
 var CONTACTS_DATA = [];
 var RECORDS_PER_PAGE_LIMIT = 10;
+var FIRST_PAGE = 1;
 
 /**
  * Function to generate loader
@@ -86,24 +87,33 @@ const hideInputSpinnerShowClearBtn = () => {
   let iconHtml = "";
   let searchInputValue = searchEl.value;
   if (searchInputValue !== "") {
-    iconHtml = `<i class="fa fa-close clear-icon position-absolute"></i>`;
+    iconHtml = `<i class="fa fa-close clear-icon position-absolute" onClick="clearInputText()"></i>`;
   }
   inputRightIconEl.innerHTML = iconHtml;
 };
 
 /**
+ * Function to clear input text or reset search input value
+ */
+const clearInputText = () => {
+  searchEl.value = "";
+  inputRightIconEl.innerHTML = "";
+  fetchContacts(FIRST_PAGE, null, null, false);
+};
+
+/**
  * Function get data from api
  */
-const fetchContacts = async (page = 1, searchInputValue, filter) => {
+const fetchContacts = async (page = FIRST_PAGE, searchInputValue, filter, isLoader = true) => {
   try {
+    if (isLoader) showLoader();
+
     let url = `${API_END_POINT}/v1/api/micro/contact?page=${page}&limit=${RECORDS_PER_PAGE_LIMIT}`;
     if (filter) {
       url = `${url}&type=${filter}`;
     }
     if (searchInputValue) {
       url = `${url}&search=${searchInputValue}`;
-    } else {
-      showLoader();
     }
     const response = await axios.get(url);
     CONTACTS_DATA = response.data;
@@ -128,12 +138,22 @@ const searchContact = async () => {
     showInputSpinner();
     debounceTimeout = setTimeout(async () => {
       let q = searchEl.value;
-      fetchContacts(1, q, null);
-      hideInputSpinnerShowClearBtn();
+      fetchContacts(1, q, null, false);
+      hideSpinnerInMS();
     }, 300);
   } catch (error) {
     console.error("Failed to fetch contacts:", error);
   }
+};
+
+/**
+ * Function to hide input field spinner after 1000 millisecond
+ * TODO: It will be replace with actual promise logic, we will make render function promise based
+ */
+const hideSpinnerInMS = () => {
+  setTimeout(() => {
+    hideInputSpinnerShowClearBtn();
+  }, 1000);
 };
 
 /**
